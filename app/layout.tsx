@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Grupo Olisea',
+  title: 'Grupo Lisea',
   description: 'Acceso Seguro',
   manifest: '/manifest.json',
 };
