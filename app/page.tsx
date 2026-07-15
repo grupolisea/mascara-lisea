@@ -1,6 +1,3 @@
-import { redirect } from "next/navigation";
-
 export default function Home() {
-  // Redirigimos automáticamente al usuario al hub enmascarado
-  redirect("/hub");
+  return null; // El middleware se encargará de reescribir la página antes de que renderice
 }
