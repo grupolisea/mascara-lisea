@@ -7,6 +7,7 @@ export const revalidate = 0; // Evita cualquier tipo de caché
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    console.log("Intento de login recibido para:", body.username);
     const { username, password, deviceToken } = body;
 
     if (!username || !password || !deviceToken) {
