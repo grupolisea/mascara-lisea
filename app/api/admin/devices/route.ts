@@ -1,24 +1,37 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/prisma/client"; // <-- Importación corregida
+import { prisma } from "@/prisma/client"; // Importación desde el Singleton
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"; // Necesario para evitar errores en el Build
 
+// GET: Listar todos los dispositivos vinculados
+export async function GET() {
+  try {
+    const devices = await prisma.device.findMany({
+      include: { user: true }, // Incluye la info del usuario dueño
+      orderBy: { createdAt: "desc" },
+    });
+    return NextResponse.json(devices);
+  } catch (error) {
+    return NextResponse.json({ error: "Error al obtener dispositivos." }, { status: 500 });
+  }
+}
+
+// DELETE: Revocar (eliminar) un dispositivo por su ID
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const deviceId = searchParams.get("id");
+    const id = searchParams.get("id");
 
-    if (!deviceId) {
-      return NextResponse.json({ error: "El ID del dispositivo es requerido." }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ error: "ID de dispositivo requerido." }, { status: 400 });
     }
 
     await prisma.device.delete({
-      where: { id: deviceId },
+      where: { id: id },
     });
 
-    return NextResponse.json({ success: true, message: "Dispositivo revocado exitosamente." });
+    return NextResponse.json({ success: true, message: "Dispositivo revocado." });
   } catch (error) {
-    console.error("Error al eliminar dispositivo:", error);
-    return NextResponse.json({ error: "Error al procesar la desvinculación." }, { status: 500 });
+    return NextResponse.json({ error: "Error al eliminar dispositivo." }, { status: 500 });
   }
 }

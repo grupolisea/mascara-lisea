@@ -5,13 +5,11 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
-    const { username, password, deviceToken } = await request.json();
+    const body = await request.json();
+    const { username, password, deviceToken } = body;
 
     if (!username || !password || !deviceToken) {
-      return NextResponse.json(
-        { error: "Faltan datos obligatorios para el registro seguro." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Datos incompletos" }, { status: 400 });
     }
 
     const user = await prisma.user.findUnique({
@@ -19,43 +17,25 @@ export async function POST(request: Request) {
     });
 
     if (!user || user.password !== password) {
-      return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
+      return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
     }
 
-    const existingDevice = await prisma.device.findUnique({
-      where: { token: deviceToken },
-    });
-
-    if (existingDevice) {
-      if (existingDevice.userId === user.id) {
-        return NextResponse.json({ success: true, message: "Dispositivo reconocido. Acceso concedido." });
-      } else {
-        return NextResponse.json({ error: "Este token pertenece a otro usuario." }, { status: 403 });
-      }
+    // Lógica de dispositivos...
+    const existingDevice = await prisma.device.findUnique({ where: { token: deviceToken } });
+    
+    if (existingDevice && existingDevice.userId !== user.id) {
+        return NextResponse.json({ error: "Token en uso por otro usuario" }, { status: 403 });
     }
 
-    const deviceCount = await prisma.device.count({
-      where: { userId: user.id },
-    });
-
-    if (deviceCount >= 3) {
-      return NextResponse.json(
-        { error: "Límite superado: Esta credencial ya cuenta con 3 dispositivos vinculados." },
-        { status: 403 }
-      );
+    if (!existingDevice) {
+        const count = await prisma.device.count({ where: { userId: user.id } });
+        if (count >= 3) return NextResponse.json({ error: "Límite de 3 dispositivos" }, { status: 403 });
+        
+        await prisma.device.create({ data: { token: deviceToken, userId: user.id } });
     }
 
-    await prisma.device.create({
-      data: {
-        token: deviceToken,
-        userId: user.id,
-      },
-    });
-
-    return NextResponse.json({ success: true, message: "Nuevo dispositivo vinculado exitosamente." });
-
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error en API Login:", error);
-    return NextResponse.json({ error: "Error interno del servidor." }, { status: 500 });
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }
