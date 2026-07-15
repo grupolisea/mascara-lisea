@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/prisma/client"; // Importación desde el Singleton
+import { prisma } from "@/prisma/client"; 
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0; 
+
 export async function GET() {
   try {
     const devices = await prisma.device.findMany({
-      include: { user: true }, // Incluye la info del usuario dueño
+      include: { user: true }, 
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(devices);
