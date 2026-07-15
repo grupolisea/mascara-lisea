@@ -2,11 +2,9 @@ import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
-// Creamos el cliente sin opciones complejas.
-// La clave está en el objeto de configuración vacío o solo con 'log'.
-export const prisma = globalForPrisma.prisma || new PrismaClient({
-  log: ['error'],
-});
+// Usamos el cliente sin pasarle objetos de configuración 
+// que puedan entrar en conflicto con la versión 7+
+export const prisma = globalForPrisma.prisma || new PrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
