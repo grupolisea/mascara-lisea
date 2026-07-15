@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
+// El motor estándar no necesita configuración extra
 export const prisma = globalForPrisma.prisma || new PrismaClient({
   log: ['error'],
 });
