@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/client"; // Importación desde el Singleton
 
-export const dynamic = "force-dynamic"; // Necesario para evitar errores en el Build
-
-// GET: Listar todos los dispositivos vinculados
+export const dynamic = "force-dynamic";
+export const revalidate = 0; 
 export async function GET() {
   try {
     const devices = await prisma.device.findMany({

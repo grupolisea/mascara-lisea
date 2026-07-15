@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 // Cambia esto en TODOS los archivos:
 import { prisma } from "@/prisma/client";
 export const dynamic = "force-dynamic";
+export const revalidate = 0; // Evita cualquier tipo de caché
 
 // GET: Listar todos los usuarios con sus dispositivos vinculados
 export async function GET() {

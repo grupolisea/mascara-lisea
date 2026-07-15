@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/client";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0; // Evita cualquier tipo de caché
 
 export async function POST(request: Request) {
   try {
