@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/prisma/client"; // <-- Importación corregida
 
 export const dynamic = "force-dynamic";
-
-const prisma = new PrismaClient();
 
 export async function DELETE(request: Request) {
   try {
@@ -14,7 +12,6 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "El ID del dispositivo es requerido." }, { status: 400 });
     }
 
-    // Borrar físicamente el token vinculado de la base de datos
     await prisma.device.delete({
       where: { id: deviceId },
     });

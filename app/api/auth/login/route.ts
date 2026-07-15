@@ -1,15 +1,12 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/prisma/client";
 
 export const dynamic = "force-dynamic";
-
-const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
     const { username, password, deviceToken } = await request.json();
 
-    // 1. Validar campos obligatorios
     if (!username || !password || !deviceToken) {
       return NextResponse.json(
         { error: "Faltan datos obligatorios para el registro seguro." },
@@ -17,21 +14,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Buscar al usuario por su credencial única
     const user = await prisma.user.findUnique({
       where: { username },
     });
 
-    if (!user) {
+    if (!user || user.password !== password) {
       return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
     }
 
-    // 3. Validar contraseña directa (para desarrollo)
-    if (user.password !== password) {
-      return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
-    }
-
-    // 4. Verificar si este dispositivo ya fue registrado previamente para este usuario
     const existingDevice = await prisma.device.findUnique({
       where: { token: deviceToken },
     });
@@ -40,11 +30,10 @@ export async function POST(request: Request) {
       if (existingDevice.userId === user.id) {
         return NextResponse.json({ success: true, message: "Dispositivo reconocido. Acceso concedido." });
       } else {
-        return NextResponse.json({ error: "Este token de dispositivo pertenece a otro usuario." }, { status: 403 });
+        return NextResponse.json({ error: "Este token pertenece a otro usuario." }, { status: 403 });
       }
     }
 
-    // 5. Validar que el usuario no tenga ya 3 dispositivos vinculados
     const deviceCount = await prisma.device.count({
       where: { userId: user.id },
     });
@@ -56,7 +45,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // 6. Si tiene menos de 3, registramos el nuevo token vinculado al usuario
     await prisma.device.create({
       data: {
         token: deviceToken,

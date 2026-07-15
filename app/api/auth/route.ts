@@ -1,70 +1,49 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client"; 
+import { prisma } from "@/prisma/client"; // <-- Importación corregida
 
 export const dynamic = "force-dynamic";
-
-const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
     const { username, password, deviceToken } = await request.json();
 
-    // 1. Validar campos obligatorios
     if (!username || !password || !deviceToken) {
-      return NextResponse.json(
-        { error: "Faltan datos obligatorios para el registro seguro." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Faltan datos obligatorios." }, { status: 400 });
     }
 
-    // 2. Buscar al usuario por su credencial única (username)
     const user = await prisma.user.findUnique({
       where: { username },
     });
 
-    if (!user) {
+    if (!user || user.password !== password) {
       return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
     }
 
-    // 3. Validar contraseña directa
-    if (user.password !== password) {
-      return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
-    }
-
-    // 4. Verificar si este dispositivo ya fue registrado previamente para este usuario
     const existingDevice = await prisma.device.findUnique({
       where: { token: deviceToken },
     });
 
     if (existingDevice) {
       if (existingDevice.userId === user.id) {
-        return NextResponse.json({ success: true, message: "Dispositivo reconocido. Acceso concedido." });
+        return NextResponse.json({ success: true, message: "Dispositivo reconocido." });
       } else {
-        return NextResponse.json({ error: "Este token de dispositivo pertenece a otro usuario." }, { status: 403 });
+        return NextResponse.json({ error: "Token asignado a otro usuario." }, { status: 403 });
       }
     }
 
-    // 5. Validar que el usuario no tenga ya 3 dispositivos vinculados
     const deviceCount = await prisma.device.count({
       where: { userId: user.id },
     });
 
     if (deviceCount >= 3) {
-      return NextResponse.json(
-        { error: "Límite superado: Esta credencial ya cuenta con 3 dispositivos vinculados." },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Límite superado (Máx 3 dispositivos)." }, { status: 403 });
     }
 
-    // 6. Si tiene menos de 3 slots ocupados, registramos el nuevo token de este dispositivo
     await prisma.device.create({
-      data: {
-        token: deviceToken,
-        userId: user.id,
-      },
+      data: { token: deviceToken, userId: user.id },
     });
 
-    return NextResponse.json({ success: true, message: "Nuevo dispositivo vinculado exitosamente." });
+    return NextResponse.json({ success: true, message: "Dispositivo vinculado." });
 
   } catch (error) {
     console.error("Error en API Login:", error);
