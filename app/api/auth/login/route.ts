@@ -1,54 +1,186 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/prisma/client";
-
-export const dynamic = "force-dynamic";
+import { compare } from "bcryptjs";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const { username, password, deviceToken } = body;
+  const userAgent = request.headers.get("user-agent") || "";
 
-    // 1. Validación estricta
-    if (!username || !password || !deviceToken) {
-      return NextResponse.json({ error: "Faltan datos requeridos" }, { status: 400 });
+const isAndroid = /Android/i.test(userAgent);
+
+const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
+
+if (!isAndroid && !isIOS) {
+  return NextResponse.json(
+    {
+      error:
+        "Esta aplicación únicamente puede utilizarse desde dispositivos Android o iPhone.",
+    },
+    {
+      status: 403,
+    }
+  );
+}
+  try {
+    const {
+  username,
+  password,
+  deviceToken,
+} = await request.json();
+
+    if (!username || !password) {
+      return NextResponse.json(
+        { error: "Usuario y contraseña son obligatorios" },
+        { status: 400 }
+      );
     }
 
-    // 2. Transacción atómica para evitar estados inconsistentes
-    const result = await prisma.$transaction(async (tx) => {
-      // Buscar usuario
-      const user = await tx.user.findUnique({ where: { username } });
-      if (!user || user.password !== password) throw new Error("AUTH_FAILED");
+    // ============================
+    // SUPERADMIN
+    // ============================
 
-      // Validar dispositivo
-      const existingDevice = await tx.device.findUnique({ where: { token: deviceToken } });
+    const superAdminEmail = process.env.SUPERADMIN_EMAIL;
+    const superAdminPassword = process.env.SUPERADMIN_PASSWORD;
 
-      if (existingDevice) {
-        if (existingDevice.userId !== user.id) throw new Error("TOKEN_IN_USE");
-        return { success: true }; // Ya registrado
+    if (
+      username === superAdminEmail &&
+      password === superAdminPassword
+    ) {
+      const response = NextResponse.json({
+        success: true,
+        role: "SUPERADMIN",
+      });
+
+      response.cookies.set("auth_token", "superadmin", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+      });
+
+      return response;
+    }
+
+    // ============================
+    // USUARIO
+    // ============================
+
+    const { data: credential, error } = await supabaseAdmin
+      .from("credentials")
+      .select("*")
+      .eq("username", username)
+      .single();
+
+    if (error || !credential) {
+      return NextResponse.json(
+        { error: "Credenciales incorrectas" },
+        { status: 401 }
+      );
+    }
+
+    if (!credential.active) {
+      return NextResponse.json(
+        { error: "La credencial está desactivada" },
+        { status: 403 }
+      );
+    }
+
+    const validPassword = await compare(
+      password,
+      credential.password_hash
+    );
+
+    if (!validPassword) {
+      return NextResponse.json(
+        { error: "Credenciales incorrectas" },
+        { status: 401 }
+      );
+    }
+    // ============================
+// VALIDAR DISPOSITIVO
+// ============================
+
+const { data: existingDevice } = await supabaseAdmin
+  .from("devices")
+  .select("*")
+  .eq("credential_id", credential.id)
+  .eq("device_fingerprint", deviceToken)
+  .single();
+
+if (existingDevice) {
+
+  await supabaseAdmin
+    .from("devices")
+    .update({
+      last_login: new Date().toISOString()
+    })
+    .eq("id", existingDevice.id);
+
+} else {
+
+  const { count } = await supabaseAdmin
+    .from("devices")
+    .select("*", {
+      count: "exact",
+      head: true
+    })
+    .eq("credential_id", credential.id)
+    .eq("active", true);
+
+  if ((count ?? 0) >= credential.max_devices) {
+
+    return NextResponse.json(
+      {
+        error:
+          "Esta credencial ya alcanzó el máximo de dispositivos permitidos."
+      },
+      {
+        status: 403
       }
+    );
 
-      // Validar límite
-      const count = await tx.device.count({ where: { userId: user.id } });
-      if (count >= 3) throw new Error("LIMIT_REACHED");
+  }
 
-      // Crear nuevo
-      await tx.device.create({ data: { token: deviceToken, userId: user.id } });
-      return { success: true };
+  await supabaseAdmin
+    .from("devices")
+    .insert({
+
+      credential_id: credential.id,
+
+      device_fingerprint: deviceToken,
+
+      device_name: "Equipo",
+
+      device_model: "Navegador",
+
+      active: true
+
     });
 
-    return NextResponse.json(result);
+}
 
-  } catch (error: any) {
-    console.error("DEBUG LOGIN ERROR:", error.message);
+    const response = NextResponse.json({
+      success: true,
+      role: "USER",
+      credentialId: credential.id,
+    });
 
-    // Mapeo preciso de errores para el frontend
-    const errorMap: Record<string, { status: number, message: string }> = {
-      AUTH_FAILED: { status: 401, message: "Credenciales incorrectas" },
-      TOKEN_IN_USE: { status: 403, message: "Este dispositivo ya está vinculado a otra cuenta" },
-      LIMIT_REACHED: { status: 403, message: "Has alcanzado el límite de 3 dispositivos" }
-    };
+    response.cookies.set("auth_token", credential.id, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
 
-    const err = errorMap[error.message] || { status: 500, message: "Error interno del servidor" };
-    return NextResponse.json({ error: err.message }, { status: err.status });
+    return response;
+
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
   }
 }

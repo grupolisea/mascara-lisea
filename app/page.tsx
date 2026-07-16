@@ -1,48 +1,51 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    // 1. Verificar si existe un token generado en este dispositivo
-    const token = localStorage.getItem("lisea_device_token");
+    const timer = setTimeout(() => {
+      const session = localStorage.getItem("ml_session");
 
-    if (!token) {
-      // Si ni siquiera hay token local, va directo al login
-      window.location.href = "/login";
-      return;
-    }
+      if (session) {
+        router.replace("/dashboard");
+      } else {
+        router.replace("/login");
+      }
+    }, 1800);
 
-    // 2. Opcional: Validar de forma rápida contra el backend si el token sigue activo
-    // Para no retrasar tu prueba inmediata, asumimos que si el token existe localmente tras el login exitoso, le damos paso:
-    setIsAuthenticated(true);
-  }, []);
+    return () => clearTimeout(timer);
+  }, [router]);
 
-  // Mientras evalúa el token, mostramos una pantalla limpia de carga
-  if (isAuthenticated === null) {
-    return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", backgroundColor: "#0f172a", color: "#38bdf8", fontFamily: "sans-serif" }}>
-        <h3>Verificando integridad del dispositivo...</h3>
-      </div>
-    );
-  }
-
-  // Si está validado, se despliega el visor inmune en pantalla completa ocultando la URL primordial
   return (
-    <div style={{ width: "100vw", height: "100vh", margin: 0, padding: 0, overflow: "hidden", backgroundColor: "#0f172a" }}>
-      <iframe
-        src="https://qr-access-hub-1.emergent.host"
-        title="Portal Seguro Grupo Lisea"
+    <main
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+        width: "100vw",
+        height: "100vh",
+        background: "#050505",
+        color: "#fff",
+      }}
+    >
+      <h1
         style={{
-          width: "100%",
-          height: "100%",
-          border: "none",
-          outline: "none",
+          color: "#D4AF37",
+          fontSize: "2.5rem",
+          letterSpacing: "6px",
         }}
-        allow="clipboard-write"
-      />
-    </div>
+      >
+        MÁSCARA LISEA
+      </h1>
+
+      <p style={{ marginTop: 20 }}>
+        Inicializando...
+      </p>
+    </main>
   );
 }
