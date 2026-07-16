@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export default function HomePage() {
+export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
@@ -15,7 +15,7 @@ export default function HomePage() {
       } else {
         router.replace("/login");
       }
-    }, 2000);
+    }, 1800);
 
     return () => clearTimeout(timer);
   }, [router]);
@@ -26,17 +26,18 @@ export default function HomePage() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        flexDirection: "column",
+        width: "100vw",
         height: "100vh",
         background: "#050505",
         color: "#fff",
-        flexDirection: "column",
       }}
     >
       <h1
         style={{
-          fontSize: "2.2rem",
-          letterSpacing: "4px",
           color: "#D4AF37",
+          fontSize: "2.5rem",
+          letterSpacing: "6px",
         }}
       >
         MÁSCARA LISEA

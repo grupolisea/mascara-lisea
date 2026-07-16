@@ -3,12 +3,11 @@ export default function Dashboard() {
     <main
       style={{
         minHeight: "100vh",
-        background: "#050505",
-        color: "#fff",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        fontSize: "2rem",
+        background: "#050505",
+        color: "white",
       }}
     >
       Dashboard Máscara Lisea
