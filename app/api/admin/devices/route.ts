@@ -1,37 +1,28 @@
 import { NextResponse } from "next/server";
-// PON ESTA LÍNEA EXACTA
-import { prisma } from "@/lib/prisma";
+
 export const dynamic = "force-dynamic";
-export const revalidate = 0; 
+export const revalidate = 0;
 
 export async function GET() {
-  try {
-    const devices = await prisma.device.findMany({
-      include: { user: true }, 
-      orderBy: { createdAt: "desc" },
-    });
-    return NextResponse.json(devices);
-  } catch (error) {
-    return NextResponse.json({ error: "Error al obtener dispositivos." }, { status: 500 });
-  }
+  return NextResponse.json({
+    success: true,
+    users: [],
+    message: "Módulo de usuarios en migración a Supabase."
+  });
 }
 
-// DELETE: Revocar (eliminar) un dispositivo por su ID
-export async function DELETE(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
+export async function POST(request: Request) {
+  const { username, password } = await request.json();
 
-    if (!id) {
-      return NextResponse.json({ error: "ID de dispositivo requerido." }, { status: 400 });
-    }
-
-    await prisma.device.delete({
-      where: { id: id },
-    });
-
-    return NextResponse.json({ success: true, message: "Dispositivo revocado." });
-  } catch (error) {
-    return NextResponse.json({ error: "Error al eliminar dispositivo." }, { status: 500 });
+  if (!username || !password) {
+    return NextResponse.json(
+      { error: "Datos incompletos." },
+      { status: 400 }
+    );
   }
+
+  return NextResponse.json({
+    success: true,
+    message: "Creación de usuarios disponible en la siguiente fase."
+  });
 }
