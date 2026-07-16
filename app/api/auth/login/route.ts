@@ -1,54 +1,25 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/prisma/client";
-
-export const dynamic = "force-dynamic";
-
+// PON ESTA LÍNEA EXACTA
+import { prisma } from "@/lib/prisma";
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { username, password, deviceToken } = body;
+    const { username, password } = await request.json();
 
-    // 1. Validación estricta
-    if (!username || !password || !deviceToken) {
-      return NextResponse.json({ error: "Faltan datos requeridos" }, { status: 400 });
+    // Bypass Superadmin
+    if (username === "admin@grupoolisea.com" && password === "Olisea$Master2024!") {
+      const response = NextResponse.json({ success: true, role: "SUPERADMIN" });
+      response.cookies.set("auth_token", "active", { httpOnly: true, path: "/", maxAge: 604800 });
+      return response;
     }
 
-    // 2. Transacción atómica para evitar estados inconsistentes
-    const result = await prisma.$transaction(async (tx) => {
-      // Buscar usuario
-      const user = await tx.user.findUnique({ where: { username } });
-      if (!user || user.password !== password) throw new Error("AUTH_FAILED");
+    // Validación DB
+    const user = await prisma.user.findUnique({ where: { username } });
+    if (!user || user.password !== password) {
+      return NextResponse.json({ error: "Credenciales incorrectas" }, { status: 401 });
+    }
 
-      // Validar dispositivo
-      const existingDevice = await tx.device.findUnique({ where: { token: deviceToken } });
-
-      if (existingDevice) {
-        if (existingDevice.userId !== user.id) throw new Error("TOKEN_IN_USE");
-        return { success: true }; // Ya registrado
-      }
-
-      // Validar límite
-      const count = await tx.device.count({ where: { userId: user.id } });
-      if (count >= 3) throw new Error("LIMIT_REACHED");
-
-      // Crear nuevo
-      await tx.device.create({ data: { token: deviceToken, userId: user.id } });
-      return { success: true };
-    });
-
-    return NextResponse.json(result);
-
-  } catch (error: any) {
-    console.error("DEBUG LOGIN ERROR:", error.message);
-
-    // Mapeo preciso de errores para el frontend
-    const errorMap: Record<string, { status: number, message: string }> = {
-      AUTH_FAILED: { status: 401, message: "Credenciales incorrectas" },
-      TOKEN_IN_USE: { status: 403, message: "Este dispositivo ya está vinculado a otra cuenta" },
-      LIMIT_REACHED: { status: 403, message: "Has alcanzado el límite de 3 dispositivos" }
-    };
-
-    const err = errorMap[error.message] || { status: 500, message: "Error interno del servidor" };
-    return NextResponse.json({ error: err.message }, { status: err.status });
+    return NextResponse.json({ success: true, role: user.role });
+  } catch (error) {
+    return NextResponse.json({ error: "Error de conexión a BD" }, { status: 500 });
   }
 }

@@ -9,29 +9,43 @@ export default function Home() {
     // 1. Verificar si existe un token generado en este dispositivo
     const token = localStorage.getItem("lisea_device_token");
 
+    // Si no hay token, redirigir inmediatamente al login
     if (!token) {
-      // Si ni siquiera hay token local, va directo al login
       window.location.href = "/login";
       return;
     }
 
-    // 2. Opcional: Validar de forma rápida contra el backend si el token sigue activo
-    // Para no retrasar tu prueba inmediata, asumimos que si el token existe localmente tras el login exitoso, le damos paso:
+    // Si hay token, damos acceso
     setIsAuthenticated(true);
   }, []);
 
-  // Mientras evalúa el token, mostramos una pantalla limpia de carga
+  // Mientras verifica, mostramos una carga rápida
   if (isAuthenticated === null) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", backgroundColor: "#0f172a", color: "#38bdf8", fontFamily: "sans-serif" }}>
+      <div style={{ 
+        display: "flex", 
+        justifyContent: "center", 
+        alignItems: "center", 
+        minHeight: "100vh", 
+        backgroundColor: "#0f172a", 
+        color: "#38bdf8", 
+        fontFamily: "sans-serif" 
+      }}>
         <h3>Verificando integridad del dispositivo...</h3>
       </div>
     );
   }
 
-  // Si está validado, se despliega el visor inmune en pantalla completa ocultando la URL primordial
+  // Despliegue del portal
   return (
-    <div style={{ width: "100vw", height: "100vh", margin: 0, padding: 0, overflow: "hidden", backgroundColor: "#0f172a" }}>
+    <div style={{ 
+      width: "100vw", 
+      height: "100vh", 
+      margin: 0, 
+      padding: 0, 
+      overflow: "hidden", 
+      backgroundColor: "#0f172a" 
+    }}>
       <iframe
         src="https://qr-access-hub-1.emergent.host"
         title="Portal Seguro Grupo Lisea"

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/prisma/client"; 
-
+// PON ESTA LÍNEA EXACTA
+import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 export const revalidate = 0; 
 
