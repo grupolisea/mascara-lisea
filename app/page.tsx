@@ -43,9 +43,9 @@ export default function Home() {
         MÁSCARA LISEA
       </h1>
 
-      <p style={{ marginTop: 20 }}>
-        Inicializando...
-      </p>
+    <p style={{ marginTop: 20, color: "red", fontSize: 40 }}>
+  VERSION NUEVA
+</p>
     </main>
   );
 }
