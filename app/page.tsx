@@ -21,16 +21,30 @@ export default function HomePage() {
   }, [router]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-black text-white">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold tracking-widest">
-          MÁSCARA LISEA
-        </h1>
+    <main
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        background: "#050505",
+        color: "#fff",
+        flexDirection: "column",
+      }}
+    >
+      <h1
+        style={{
+          fontSize: "2.2rem",
+          letterSpacing: "4px",
+          color: "#D4AF37",
+        }}
+      >
+        MÁSCARA LISEA
+      </h1>
 
-        <p className="mt-4 text-yellow-500">
-          Inicializando...
-        </p>
-      </div>
+      <p style={{ marginTop: 20 }}>
+        Inicializando...
+      </p>
     </main>
   );
 }
