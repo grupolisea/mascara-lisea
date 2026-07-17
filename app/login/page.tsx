@@ -55,9 +55,24 @@ export default function LoginPage() {
         );
       }
 
+      // ============================
+      // SUPERADMIN
+      // ============================
+
+      if (data.role === "SUPERADMIN") {
+        alert("👑 Bienvenido Superadministrador");
+        window.location.href = "/admin";
+        return;
+      }
+
+      // ============================
+      // USUARIO NORMAL
+      // ============================
+
       alert("🔒 Dispositivo vinculado y validado. Accediendo...");
 
       window.location.href = "/mask";
+
     } catch (err: any) {
       setError(err.message);
     } finally {
