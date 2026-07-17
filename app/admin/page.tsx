@@ -242,12 +242,12 @@ export default function AdminPage() {
             fontSize: 16,
           }}
         />        {filteredCredentials.map((credential) => {
-          const used = credential.devices.length;
-          const free = credential.max_devices - used;
+          const used = currentCredential.devices.length;
+          const free = currentCredential.max_devices - used;
 
           return (
             <div
-              key={credential.id}
+              key={currentCredential.id}
               style={{
                 background: "#111",
                 border: "1px solid #222",
@@ -278,14 +278,14 @@ export default function AdminPage() {
 
                   <div
                     style={{
-                      color: credential.active
+                      color: currentCredential.active
                         ? "#22c55e"
                         : "#ef4444",
                       marginTop: 8,
                       fontWeight: "bold",
                     }}
                   >
-                    {credential.active
+                    {currentCredential.active
                       ? "● Activa"
                       : "● Desactivada"}
                   </div>
@@ -303,7 +303,7 @@ export default function AdminPage() {
                       fontWeight: "bold",
                     }}
                   >
-                    {used} / {credential.max_devices}
+                    {used} / {currentCredential.max_devices}
                   </div>
 
                   <div
@@ -321,7 +321,7 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {credential.devices.length === 0 && (
+              {currentCredential.devices.length === 0 && (
                 <div
                   style={{
                     color: "#777",
@@ -332,7 +332,7 @@ export default function AdminPage() {
                 </div>
               )}
 
-              {credential.devices.map((device) => (
+              {currentCredential.devices.map((device) => (
                 <div
                   key={device.id}
                   style={{

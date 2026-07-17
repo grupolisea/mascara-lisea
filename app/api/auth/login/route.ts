@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { compare } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export async function POST(request: Request) {
@@ -76,14 +76,48 @@ console.log("Usuario recibido:", username);
 console.log("Credencial encontrada:", credential);
 console.log("Error Supabase:", error);
 
-    if (error || !credential) {
-      return NextResponse.json(
-        { error: "Credenciales incorrectas" },
-        { status: 401 }
-      );
-    }
 
-    if (!credential.active) {
+let currentCredential = credential;
+
+// Si la credencial no existe, crearla automáticamente
+if (!currentCredential) {
+
+  const passwordHash = await hash(password, 10);
+
+  const { data: newCredential, error: createError } =
+    await supabaseAdmin
+      .from("credentials")
+      .insert({
+        username,
+        password_hash: passwordHash,
+        active: true,
+        max_devices: 3,
+      })
+      .select()
+      .single();
+
+  if (createError || !newCredential) {
+
+    console.error(createError);
+
+    return NextResponse.json(
+      {
+        error: "No fue posible crear la credencial."
+      },
+      {
+        status: 500
+      }
+    );
+
+  }
+
+  currentCredential = newCredential;
+
+  console.log("Nueva credencial creada:", currentCredential);
+
+}
+
+    if (!currentCredential.active) {
       return NextResponse.json(
         { error: "La credencial está desactivada" },
         { status: 403 }
@@ -92,7 +126,7 @@ console.log("Error Supabase:", error);
 
     const validPassword = await compare(
       password,
-      credential.password_hash
+      currentCredential.password_hash
     );
 
     console.log("Contraseña válida:", validPassword);
@@ -110,7 +144,7 @@ console.log("Error Supabase:", error);
 const { data: existingDevice } = await supabaseAdmin
   .from("devices")
   .select("*")
-  .eq("credential_id", credential.id)
+  .eq("credential_id", currentCredential.id)
   .eq("device_fingerprint", deviceToken)
   .single();
 
@@ -131,10 +165,10 @@ if (existingDevice) {
       count: "exact",
       head: true
     })
-    .eq("credential_id", credential.id)
+    .eq("credential_id", currentCredential.id)
     .eq("active", true);
 
-  if ((count ?? 0) >= credential.max_devices) {
+  if ((count ?? 0) >= currentCredential.max_devices) {
 
     return NextResponse.json(
       {
@@ -152,7 +186,7 @@ if (existingDevice) {
     .from("devices")
     .insert({
 
-      credential_id: credential.id,
+      credential_id: currentCredential.id,
 
       device_fingerprint: deviceToken,
 
@@ -169,10 +203,10 @@ if (existingDevice) {
     const response = NextResponse.json({
       success: true,
       role: "USER",
-      credentialId: credential.id,
+      credentialId: currentCredential.id,
     });
 
-    response.cookies.set("auth_token", credential.id, {
+    response.cookies.set("auth_token", currentCredential.id, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
