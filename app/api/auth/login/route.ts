@@ -71,6 +71,11 @@ if (!isAndroid && !isIOS) {
       .eq("username", username)
       .single();
 
+      console.log("========== LOGIN ==========");
+console.log("Usuario recibido:", username);
+console.log("Credencial encontrada:", credential);
+console.log("Error Supabase:", error);
+
     if (error || !credential) {
       return NextResponse.json(
         { error: "Credenciales incorrectas" },
@@ -89,6 +94,8 @@ if (!isAndroid && !isIOS) {
       password,
       credential.password_hash
     );
+
+    console.log("Contraseña válida:", validPassword);
 
     if (!validPassword) {
       return NextResponse.json(

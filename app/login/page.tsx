@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
 
 export default function LoginPage() {
@@ -33,31 +34,30 @@ export default function LoginPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-  username,
-  password,
-  deviceToken,
-
-  deviceInfo: {
-    platform: navigator.platform,
-    userAgent: navigator.userAgent,
-    language: navigator.language,
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    screen: `${window.screen.width}x${window.screen.height}`,
-  },
-}),
+          username,
+          password,
+          deviceToken,
+          deviceInfo: {
+            platform: navigator.platform,
+            userAgent: navigator.userAgent,
+            language: navigator.language,
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            screen: `${window.screen.width}x${window.screen.height}`,
+          },
+        }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Error al validar las credenciales.");
+        throw new Error(
+          data.error || "Error al validar las credenciales."
+        );
       }
 
       alert("🔒 Dispositivo vinculado y validado. Accediendo...");
 
-      // Ahora entra a la máscara
       window.location.href = "/mask";
-
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -68,120 +68,125 @@ export default function LoginPage() {
   return (
     <div
       style={{
+        minHeight: "100vh",
+        background: "#000",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        minHeight: "100vh",
-        backgroundColor: "#0f172a",
-        fontFamily: "sans-serif",
+        padding: "20px",
       }}
     >
       <form
         onSubmit={handleSubmit}
         style={{
-          backgroundColor: "#1e293b",
-          padding: "40px",
-          borderRadius: "12px",
           width: "100%",
-          maxWidth: "400px",
-          boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
+          maxWidth: 420,
+          background: "#111",
+          border: "1px solid #2a2a2a",
+          borderRadius: 16,
+          padding: 40,
+          boxShadow: "0 0 40px rgba(0,0,0,.45)",
         }}
       >
-        <h2
+        <div
           style={{
-            color: "#38bdf8",
-            textAlign: "center",
-            marginBottom: "24px",
+            display: "flex",
+            justifyContent: "center",
+            marginBottom: 30,
           }}
         >
-          Grupo Lisea
-        </h2>
+          <Image
+            src="/logo-lisea.png"
+            alt="Grupo Lisea"
+            width={180}
+            height={180}
+            priority
+          />
+        </div>
 
         {error && (
           <div
             style={{
-              backgroundColor: "#f87171",
-              color: "#7f1d1d",
-              padding: "10px",
-              borderRadius: "6px",
-              marginBottom: "16px",
-              fontSize: "14px",
+              background: "#4b1113",
+              color: "#ffb4b4",
+              padding: 12,
+              borderRadius: 8,
+              marginBottom: 20,
             }}
           >
-            ⚠️ {error}
+            {error}
           </div>
         )}
 
-        <div style={{ marginBottom: "16px" }}>
-          <label
-            style={{
-              color: "#94a3b8",
-              display: "block",
-              marginBottom: "8px",
-            }}
-          >
-            Usuario Único
-          </label>
+        <label
+          style={{
+            color: "#D4AF37",
+            display: "block",
+            marginBottom: 8,
+          }}
+        >
+          Usuario
+        </label>
 
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: "6px",
-              border: "1px solid #334155",
-              backgroundColor: "#0f172a",
-              color: "#f8fafc",
-            }}
-          />
-        </div>
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          style={{
+            width: "100%",
+            padding: 12,
+            marginBottom: 20,
+            background: "#000",
+            color: "#fff",
+            border: "1px solid #444",
+            borderRadius: 8,
+          }}
+        />
 
-        <div style={{ marginBottom: "24px" }}>
-          <label
-            style={{
-              color: "#94a3b8",
-              display: "block",
-              marginBottom: "8px",
-            }}
-          >
-            Contraseña
-          </label>
+        <label
+          style={{
+            color: "#D4AF37",
+            display: "block",
+            marginBottom: 8,
+          }}
+        >
+          Contraseña
+        </label>
 
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: "6px",
-              border: "1px solid #334155",
-              backgroundColor: "#0f172a",
-              color: "#f8fafc",
-            }}
-          />
-        </div>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          style={{
+            width: "100%",
+            padding: 12,
+            marginBottom: 30,
+            background: "#000",
+            color: "#fff",
+            border: "1px solid #444",
+            borderRadius: 8,
+          }}
+        />
 
         <button
           type="submit"
           disabled={loading}
           style={{
             width: "100%",
-            padding: "12px",
-            borderRadius: "6px",
-            backgroundColor: "#38bdf8",
-            color: "#0f172a",
+            padding: 14,
+            background: "#D4AF37",
+            color: "#000",
+            border: "none",
+            borderRadius: 8,
             fontWeight: "bold",
             cursor: "pointer",
-            border: "none",
+            fontSize: 16,
           }}
         >
           {loading
-            ? "Comprobando slots de dispositivos (Máx 3)..."
+            ? "Comprobando dispositivos..."
             : "Vincular e Ingresar"}
         </button>
       </form>
