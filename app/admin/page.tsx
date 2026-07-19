@@ -58,6 +58,8 @@ async function deleteDevice(id: string) {
     return;
   }
 
+  alert("✅ Dispositivo eliminado correctamente.");
+
   await loadCredentials();
 }
 
@@ -397,19 +399,20 @@ async function deleteDevice(id: string) {
           </div>
 
                   <button
-                    style={{
-                      marginTop: 15,
-                      background: "#ef4444",
-                      color: "white",
-                      border: "none",
-                      padding: "10px 18px",
-                      borderRadius: 8,
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Eliminar dispositivo
-                  </button>
+  onClick={() => deleteDevice(device.id)}
+  style={{
+    marginTop: 15,
+    background: "#ef4444",
+    color: "white",
+    border: "none",
+    padding: "10px 18px",
+    borderRadius: 8,
+    cursor: "pointer",
+    fontWeight: "bold",
+  }}
+>
+  🗑 Eliminar dispositivo
+</button>
                 </div>
               ))}
             </div>

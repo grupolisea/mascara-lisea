@@ -9,30 +9,28 @@ export async function DELETE(request: Request) {
     const { id } = await request.json();
 
     if (!id) {
-
       return NextResponse.json(
         {
-          error: "Id del dispositivo requerido."
+          error: "ID no recibido."
         },
         {
           status: 400
         }
       );
-
     }
 
     const { error } = await supabaseAdmin
       .from("devices")
-      .update({
-        active: false
-      })
+      .delete()
       .eq("id", id);
 
     if (error) {
 
+      console.error(error);
+
       return NextResponse.json(
         {
-          error: error.message
+          error: "No fue posible eliminar."
         },
         {
           status: 500
@@ -45,7 +43,9 @@ export async function DELETE(request: Request) {
       success: true
     });
 
-  } catch {
+  } catch (err) {
+
+    console.error(err);
 
     return NextResponse.json(
       {
