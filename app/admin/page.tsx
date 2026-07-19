@@ -6,6 +6,7 @@ interface Device {
   id: string;
   device_name: string;
   device_model: string;
+  created_at: string;
   last_login: string;
   active: boolean;
 }
@@ -14,6 +15,7 @@ interface Credential {
   id: string;
   username: string;
   active: boolean;
+  created_at: string;
   max_devices: number;
   devices: Device[];
 }
@@ -292,29 +294,45 @@ async function deleteDevice(id: string) {
         }}
       >
         <div>
-          <h2
-            style={{
-              color: "#D4AF37",
-              margin: 0,
-            }}
-          >
-            {credential.username}
-          </h2>
+  <h2
+    style={{
+      color: "#D4AF37",
+      margin: 0,
+    }}
+  >
+    {credential.username}
+  </h2>
 
-          <div
-            style={{
-              color: credential.active
-                ? "#22c55e"
-                : "#ef4444",
-              marginTop: 8,
-              fontWeight: "bold",
-            }}
-          >
-            {credential.active
-              ? "● Activa"
-              : "● Desactivada"}
-          </div>
-        </div>
+  <div
+    style={{
+      color: "#999",
+      marginTop: 8,
+      fontSize: 14,
+    }}
+  >
+    📅 Creada:
+    {" "}
+    {credential.created_at
+      ? new Date(
+          credential.created_at
+        ).toLocaleString()
+      : "Sin registro"}
+  </div>
+
+  <div
+    style={{
+      color: credential.active
+        ? "#22c55e"
+        : "#ef4444",
+      marginTop: 8,
+      fontWeight: "bold",
+    }}
+  >
+    {credential.active
+      ? "🟢 Activa"
+      : "🔴 Desactivada"}
+  </div>
+</div>
 
         <div
           style={{
@@ -385,18 +403,35 @@ async function deleteDevice(id: string) {
           >
             Modelo: {device.device_model}
           </div>
+          <div
+  style={{
+    color: "#999",
+    marginTop: 6,
+  }}
+>
+  📅 Registrado:
+  {" "}
+  {device.created_at
+    ? new Date(
+        device.created_at
+      ).toLocaleString()
+    : "Sin registro"}
+</div>
 
           <div
-            style={{
-              color: "#999",
-              marginTop: 6,
-            }}
-          >
-            Último acceso{" "}
-            {device.last_login
-              ? new Date(device.last_login).toLocaleString()
-              : "Nunca"}
-          </div>
+  style={{
+    color: "#999",
+    marginTop: 6,
+  }}
+>
+  🕒 Último acceso:
+  {" "}
+  {device.last_login
+    ? new Date(
+        device.last_login
+      ).toLocaleString()
+    : "Nunca"}
+</div>
 
                   <button
   onClick={() => deleteDevice(device.id)}
