@@ -1,11 +1,14 @@
 {
-  "name": "Grupo Olisea Access",
-  "short_name": "Olisea",
-  "description": "Acceso exclusivo a QR Hub",
+  "id": "/",
+  "name": "Máscara LISEA",
+  "short_name": "LISEA",
+  "description": "Aplicación oficial de Máscara LISEA",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/icon-192.png",

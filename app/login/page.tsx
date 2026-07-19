@@ -11,15 +11,26 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    let token = localStorage.getItem("lisea_device_token");
 
-    if (!token) {
-      token = window.crypto.randomUUID();
-      localStorage.setItem("lisea_device_token", token);
-    }
+  const standalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (window.navigator as any).standalone === true;
 
-    setDeviceToken(token);
-  }, []);
+  if (!standalone) {
+    window.location.href = "/install";
+    return;
+  }
+
+  let token = localStorage.getItem("lisea_device_token");
+
+  if (!token) {
+    token = window.crypto.randomUUID();
+    localStorage.setItem("lisea_device_token", token);
+  }
+
+  setDeviceToken(token);
+
+}, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
