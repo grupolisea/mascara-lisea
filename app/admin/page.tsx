@@ -23,20 +23,43 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    loadCredentials();
-  }, []);
+ useEffect(() => {
+  loadCredentials();
+}, []);
 
-  async function loadCredentials() {
-    try {
-      const res = await fetch("/api/admin/credentials");
-      const data = await res.json();
+async function loadCredentials() {
+  try {
+    const res = await fetch("/api/admin/credentials");
+    const data = await res.json();
 
-      setCredentials(data);
-    } finally {
-      setLoading(false);
-    }
+    setCredentials(data);
+
+  } finally {
+    setLoading(false);
   }
+}
+
+async function deleteDevice(id: string) {
+
+  const ok = confirm("¿Eliminar este dispositivo?");
+
+  if (!ok) return;
+
+  const res = await fetch("/api/admin/devices", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id }),
+  });
+
+  if (!res.ok) {
+    alert("No fue posible eliminar.");
+    return;
+  }
+
+  await loadCredentials();
+}
 
   const filteredCredentials = useMemo(() => {
     return credentials.filter((c) =>
@@ -241,140 +264,137 @@ export default function AdminPage() {
             marginBottom: 35,
             fontSize: 16,
           }}
-        />        {filteredCredentials.map((credential) => {
-          const used = currentCredential.devices.length;
-          const free = currentCredential.max_devices - used;
+        />       {filteredCredentials.map((credential) => {
+  const used = credential.devices.length;
+  const free = credential.max_devices - used;
 
-          return (
-            <div
-              key={currentCredential.id}
-              style={{
-                background: "#111",
-                border: "1px solid #222",
-                borderRadius: 14,
-                padding: 25,
-                marginBottom: 30,
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                  gap: 15,
-                  marginBottom: 20,
-                }}
-              >
-                <div>
-                  <h2
-                    style={{
-                      color: "#D4AF37",
-                      margin: 0,
-                    }}
-                  >
-                    {credential.username}
-                  </h2>
+  return (
+    <div
+      key={credential.id}
+      style={{
+        background: "#111",
+        border: "1px solid #222",
+        borderRadius: 14,
+        padding: 25,
+        marginBottom: 30,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 15,
+          marginBottom: 20,
+        }}
+      >
+        <div>
+          <h2
+            style={{
+              color: "#D4AF37",
+              margin: 0,
+            }}
+          >
+            {credential.username}
+          </h2>
 
-                  <div
-                    style={{
-                      color: currentCredential.active
-                        ? "#22c55e"
-                        : "#ef4444",
-                      marginTop: 8,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {currentCredential.active
-                      ? "● Activa"
-                      : "● Desactivada"}
-                  </div>
-                </div>
+          <div
+            style={{
+              color: credential.active
+                ? "#22c55e"
+                : "#ef4444",
+              marginTop: 8,
+              fontWeight: "bold",
+            }}
+          >
+            {credential.active
+              ? "● Activa"
+              : "● Desactivada"}
+          </div>
+        </div>
 
-                <div
-                  style={{
-                    textAlign: "right",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 28,
-                      color: "#38bdf8",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {used} / {currentCredential.max_devices}
-                  </div>
+        <div
+          style={{
+            textAlign: "right",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 28,
+              color: "#38bdf8",
+              fontWeight: "bold",
+            }}
+          >
+            {used} / {credential.max_devices}
+          </div>
 
-                  <div
-                    style={{
-                      color:
-                        free === 0
-                          ? "#ef4444"
-                          : "#22c55e",
-                    }}
-                  >
-                    {free === 0
-                      ? "Límite alcanzado"
-                      : `${free} dispositivo(s) disponible(s)`}
-                  </div>
-                </div>
-              </div>
+          <div
+            style={{
+              color:
+                free === 0
+                  ? "#ef4444"
+                  : "#22c55e",
+            }}
+          >
+            {free === 0
+              ? "Límite alcanzado"
+              : `${free} dispositivo(s) disponible(s)`}
+          </div>
+        </div>
+      </div>
 
-              {currentCredential.devices.length === 0 && (
-                <div
-                  style={{
-                    color: "#777",
-                    padding: "15px 0",
-                  }}
-                >
-                  Esta credencial aún no tiene dispositivos registrados.
-                </div>
-              )}
+      {credential.devices.length === 0 && (
+        <div
+          style={{
+            color: "#777",
+            padding: "15px 0",
+          }}
+        >
+          Esta credencial aún no tiene dispositivos registrados.
+        </div>
+      )}
 
-              {currentCredential.devices.map((device) => (
-                <div
-                  key={device.id}
-                  style={{
-                    background: "#000",
-                    border: "1px solid #222",
-                    borderRadius: 10,
-                    padding: 18,
-                    marginBottom: 15,
-                  }}
-                >
-                  <div
-                    style={{
-                      fontWeight: "bold",
-                      color: "#fff",
-                    }}
-                  >
-                    📱 {device.device_name}
-                  </div>
+      {credential.devices.map((device) => (
+        <div
+          key={device.id}
+          style={{
+            background: "#000",
+            border: "1px solid #222",
+            borderRadius: 10,
+            padding: 18,
+            marginBottom: 15,
+          }}
+        >
+          <div
+            style={{
+              fontWeight: "bold",
+              color: "#fff",
+            }}
+          >
+            📱 {device.device_name}
+          </div>
 
-                  <div
-                    style={{
-                      color: "#999",
-                      marginTop: 6,
-                    }}
-                  >
-                    Modelo: {device.device_model}
-                  </div>
+          <div
+            style={{
+              color: "#999",
+              marginTop: 6,
+            }}
+          >
+            Modelo: {device.device_model}
+          </div>
 
-                  <div
-                    style={{
-                      color: "#999",
-                      marginTop: 6,
-                    }}
-                  >
-                    Último acceso:
-                    {" "}
-                    {device.last_login
-                      ? new Date(
-                          device.last_login
-                        ).toLocaleString()
-                      : "Nunca"}
-                  </div>
+          <div
+            style={{
+              color: "#999",
+              marginTop: 6,
+            }}
+          >
+            Último acceso{" "}
+            {device.last_login
+              ? new Date(device.last_login).toLocaleString()
+              : "Nunca"}
+          </div>
 
                   <button
                     style={{

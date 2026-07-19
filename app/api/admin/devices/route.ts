@@ -1,28 +1,60 @@
 import { NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
-export async function GET() {
-  return NextResponse.json({
-    success: true,
-    users: [],
-    message: "Módulo de usuarios en migración a Supabase."
-  });
-}
+export async function DELETE(request: Request) {
+  try {
 
-export async function POST(request: Request) {
-  const { username, password } = await request.json();
+    const { id } = await request.json();
 
-  if (!username || !password) {
+    if (!id) {
+
+      return NextResponse.json(
+        {
+          error: "Id del dispositivo requerido."
+        },
+        {
+          status: 400
+        }
+      );
+
+    }
+
+    const { error } = await supabaseAdmin
+      .from("devices")
+      .update({
+        active: false
+      })
+      .eq("id", id);
+
+    if (error) {
+
+      return NextResponse.json(
+        {
+          error: error.message
+        },
+        {
+          status: 500
+        }
+      );
+
+    }
+
+    return NextResponse.json({
+      success: true
+    });
+
+  } catch {
+
     return NextResponse.json(
-      { error: "Datos incompletos." },
-      { status: 400 }
+      {
+        error: "Error interno."
+      },
+      {
+        status: 500
+      }
     );
-  }
 
-  return NextResponse.json({
-    success: true,
-    message: "Creación de usuarios disponible en la siguiente fase."
-  });
+  }
 }
