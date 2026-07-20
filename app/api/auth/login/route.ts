@@ -118,11 +118,16 @@ if (!currentCredential) {
 }
 
     if (!currentCredential.active) {
-      return NextResponse.json(
-        { error: "La credencial está desactivada" },
-        { status: 403 }
-      );
+  return NextResponse.json(
+    {
+      error:
+        "🛡️ Nombre de usuario o contraseña escritos incorrectamente. Favor de validar su escritura."
+    },
+    {
+      status: 401
     }
+  );
+}
 
     const validPassword = await compare(
       password,
@@ -132,11 +137,16 @@ if (!currentCredential) {
     console.log("Contraseña válida:", validPassword);
 
     if (!validPassword) {
-      return NextResponse.json(
-        { error: "Credenciales incorrectas" },
-        { status: 401 }
-      );
+  return NextResponse.json(
+    {
+      error:
+        "🛡️ Nombre de usuario o contraseña escritos incorrectamente. Favor de validar su escritura."
+    },
+    {
+      status: 401
     }
+  );
+}
     // ============================
 // VALIDAR DISPOSITIVO
 // ============================
