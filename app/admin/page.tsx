@@ -281,7 +281,25 @@ async function changeStatus(
     transition:
       "all .8s cubic-bezier(.2,.8,.2,1)",
   }}
-></div>
+>
+
+  <div
+  style={{
+    display: "inline-block",
+    padding: "10px 22px",
+    borderRadius: 40,
+    border: "1px solid rgba(212,175,55,.35)",
+    background: "rgba(212,175,55,.06)",
+    color: "#D4AF37",
+    fontSize: 14,
+    letterSpacing: 2,
+    marginBottom: 30,
+    fontWeight: "bold",
+  }}
+>
+  👑 Bienvenido nuevamente
+</div>
+</div>
 
   <div
   className={`${premiumFont.className} ${
