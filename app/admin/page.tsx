@@ -65,6 +65,39 @@ async function deleteDevice(id: string) {
   await loadCredentials();
 }
 
+async function deleteCredential(id: string) {
+
+  const ok = confirm(
+    "¿Eliminar esta credencial?\n\nTambién se eliminarán todos los dispositivos vinculados."
+  );
+
+  if (!ok) return;
+
+  const res = await fetch(
+    "/api/admin/credentials/delete",
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id,
+      }),
+    }
+  );
+
+  if (!res.ok) {
+
+    alert("No fue posible eliminar la credencial.");
+
+    return;
+
+  }
+
+  await loadCredentials();
+
+}
+
   const filteredCredentials = useMemo(() => {
     return credentials.filter((c) =>
       c.username.toLowerCase().includes(search.toLowerCase())
@@ -363,6 +396,22 @@ async function deleteDevice(id: string) {
           </div>
         </div>
       </div>
+
+      <button
+  onClick={() => deleteCredential(credential.id)}
+  style={{
+    marginTop: 18,
+    background: "#b91c1c",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    padding: "10px 18px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  }}
+>
+  🗑 Eliminar usuario
+</button>
 
       {credential.devices.length === 0 && (
         <div
