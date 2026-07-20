@@ -43,6 +43,21 @@ export default function AdminPage() {
 
  useEffect(() => {
 
+
+  const [credentials, setCredentials] = useState<Credential[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [showIntro, setShowIntro] = useState(true);
+  const [toast, setToast] = useState<{
+  message: string;
+  color: string;
+} | null>(null);
+
+  const [welcome, setWelcome] = useState(true);
+  const [shine, setShine] = useState(false);
+
+ useEffect(() => {
+
   loadCredentials();
 
   useEffect(() => {
@@ -52,6 +67,26 @@ export default function AdminPage() {
 
   return () => clearTimeout(timer);
 }, []);
+
+  const timer1 = setTimeout(() => {
+    setWelcome(false);
+  }, 400);
+
+  const timer2 = setTimeout(() => {
+    setShine(true);
+  }, 900);
+
+  const timer3 = setTimeout(() => {
+    setShine(false);
+  }, 1800);
+
+  return () => {
+    clearTimeout(timer1);
+    clearTimeout(timer2);
+    clearTimeout(timer3);
+  };
+
+}, []);;
 
   const timer1 = setTimeout(() => {
     setWelcome(false);
