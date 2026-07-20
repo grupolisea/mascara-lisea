@@ -98,6 +98,37 @@ async function deleteCredential(id: string) {
 
 }
 
+async function changeStatus(
+  id: string,
+  active: boolean
+) {
+
+  const res = await fetch(
+    "/api/admin/credentials/status",
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id,
+        active,
+      }),
+    }
+  );
+
+  if (!res.ok) {
+
+    alert("No fue posible cambiar el estado.");
+
+    return;
+
+  }
+
+  await loadCredentials();
+
+}
+
   const filteredCredentials = useMemo(() => {
     return credentials.filter((c) =>
       c.username.toLowerCase().includes(search.toLowerCase())
@@ -367,6 +398,37 @@ async function deleteCredential(id: string) {
   </div>
 </div>
 
+<div
+  style={{
+    marginTop: 15,
+  }}
+>
+  <label
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      cursor: "pointer",
+      fontWeight: "bold",
+    }}
+  >
+    <input
+      type="checkbox"
+      checked={credential.active}
+      onChange={(e) =>
+        changeStatus(
+          credential.id,
+          e.target.checked
+        )
+      }
+    />
+
+    {credential.active
+      ? "🟢 Activo"
+      : "🔴 Desactivado"}
+  </label>
+</div>
+
         <div
           style={{
             textAlign: "right",
@@ -412,6 +474,8 @@ async function deleteCredential(id: string) {
 >
   🗑 Eliminar usuario
 </button>
+
+
 
       {credential.devices.length === 0 && (
         <div
