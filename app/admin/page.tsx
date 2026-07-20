@@ -1,6 +1,14 @@
 "use client";
 
+import { Cormorant_Garamond } from "next/font/google";
 import { useEffect, useMemo, useState } from "react";
+import Toast from "./components/Toast";
+import "./admin.css";
+
+const premiumFont = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
 
 interface Device {
   id: string;
@@ -24,10 +32,53 @@ export default function AdminPage() {
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [toast, setToast] = useState<{
+  message: string;
+  color: string;
+} | null>(null);
+
+  const [welcome, setWelcome] = useState(true);
+  const [shine, setShine] = useState(false);
 
  useEffect(() => {
+
   loadCredentials();
-}, []);
+
+  const timer1 = setTimeout(() => {
+    setWelcome(false);
+  }, 400);
+
+  const timer2 = setTimeout(() => {
+    setShine(true);
+  }, 900);
+
+  const timer3 = setTimeout(() => {
+    setShine(false);
+  }, 1800);
+
+  return () => {
+    clearTimeout(timer1);
+    clearTimeout(timer2);
+    clearTimeout(timer3);
+  };
+
+}, []);;
+
+function showToast(
+  message: string,
+  color: string
+) {
+
+  setToast({
+    message,
+    color,
+  });
+
+  setTimeout(() => {
+    setToast(null);
+  }, 2000);
+
+}
 
 async function loadCredentials() {
   try {
@@ -168,6 +219,7 @@ async function changeStatus(
   }
 
   return (
+
     <div
       style={{
         background: "#000",
@@ -194,6 +246,71 @@ async function changeStatus(
         >
           PANEL SUPERADMINISTRADOR
         </h1>
+
+        <div
+  style={{
+    background: "linear-gradient(135deg,#0d0d0d,#181818)",
+    border: "1px solid rgba(212,175,55,.35)",
+    borderRadius: 20,
+    padding: 28,
+    marginBottom: 35,
+    textAlign: "center",
+    boxShadow:
+      "0 0 30px rgba(212,175,55,.10)",
+    animation: "fadeWelcome .8s ease",
+  }}
+>
+
+  <div
+  style={{
+    background: "linear-gradient(135deg,#0d0d0d,#181818)",
+    border: "1px solid rgba(212,175,55,.35)",
+    borderRadius: 20,
+    padding: 28,
+    marginBottom: 35,
+    textAlign: "center",
+    boxShadow: "0 0 30px rgba(212,175,55,.10)",
+    animation: "fadeWelcome .8s ease",
+
+    opacity: welcome ? 0 : 1,
+
+    transform: welcome
+      ? "translateY(25px)"
+      : "translateY(0)",
+
+    transition:
+      "all .8s cubic-bezier(.2,.8,.2,1)",
+  }}
+></div>
+
+  <div
+  className={`${premiumFont.className} ${
+    shine ? "golden-name" : ""
+  }`}
+  style={{
+    fontSize: 46,
+    color: "#D4AF37",
+    fontWeight: 600,
+    letterSpacing: 2,
+    textShadow:
+      "0 0 18px rgba(212,175,55,.35)",
+  }}
+>
+  Ricardo Segura
+</div>
+
+  <div
+    style={{
+      color: "#999",
+      marginTop: 10,
+      fontSize: 15,
+      letterSpacing: 2,
+    }}
+  >
+    SUPERADMINISTRADOR
+  </div>
+
+</div>
 
         <div
           style={{
@@ -400,16 +517,29 @@ async function changeStatus(
 
 <div
   style={{
-    marginTop: 15,
+    marginTop: 18,
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
   }}
 >
+  <span
+    style={{
+      fontWeight: "bold",
+      color: credential.active ? "#22c55e" : "#ef4444",
+      minWidth: 95,
+    }}
+  >
+    {credential.active ? "Activo" : "Suspendido"}
+  </span>
+
   <label
     style={{
-      display: "flex",
-      alignItems: "center",
-      gap: 10,
+      position: "relative",
+      width: 56,
+      height: 30,
+      display: "inline-block",
       cursor: "pointer",
-      fontWeight: "bold",
     }}
   >
     <input
@@ -421,11 +551,41 @@ async function changeStatus(
           e.target.checked
         )
       }
+      style={{
+        opacity: 0,
+        width: 0,
+        height: 0,
+      }}
     />
 
-    {credential.active
-      ? "🟢 Activo"
-      : "🔴 Desactivado"}
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        borderRadius: 30,
+        background: credential.active
+          ? "#34C759"
+          : "#555",
+        transition: "all .30s",
+        boxShadow: credential.active
+          ? "0 0 12px rgba(52,199,89,.45)"
+          : "none",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          top: 3,
+          left: credential.active ? 29 : 3,
+          width: 24,
+          height: 24,
+          borderRadius: "50%",
+          background: "#fff",
+          transition: "all .30s",
+          boxShadow: "0 2px 6px rgba(0,0,0,.35)",
+        }}
+      />
+    </div>
   </label>
 </div>
 
