@@ -32,22 +32,6 @@ export default function AdminPage() {
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [showIntro, setShowIntro] = useState(true);
-  const [toast, setToast] = useState<{
-  message: string;
-  color: string;
-} | null>(null);
-
-  const [welcome, setWelcome] = useState(true);
-  const [shine, setShine] = useState(false);
-
- useEffect(() => {
-
-
-  const [credentials, setCredentials] = useState<Credential[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [showIntro, setShowIntro] = useState(true);
   const [toast, setToast] = useState<{
   message: string;
   color: string;
@@ -59,34 +43,6 @@ export default function AdminPage() {
  useEffect(() => {
 
   loadCredentials();
-
-  useEffect(() => {
-  const timer = setTimeout(() => {
-    setShowIntro(false);
-  }, 1200);
-
-  return () => clearTimeout(timer);
-}, []);
-
-  const timer1 = setTimeout(() => {
-    setWelcome(false);
-  }, 400);
-
-  const timer2 = setTimeout(() => {
-    setShine(true);
-  }, 900);
-
-  const timer3 = setTimeout(() => {
-    setShine(false);
-  }, 1800);
-
-  return () => {
-    clearTimeout(timer1);
-    clearTimeout(timer2);
-    clearTimeout(timer3);
-  };
-
-}, []);;
 
   const timer1 = setTimeout(() => {
     setWelcome(false);
@@ -261,53 +217,6 @@ async function changeStatus(
       </div>
     );
   }
-
-  if (showIntro) {
-  return (
-    <div
-      style={{
-        background: "#000",
-        color: "#D4AF37",
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-        gap: 18,
-      }}
-    >
-      <div
-        style={{
-          fontSize: 64,
-          fontWeight: "bold",
-          letterSpacing: 8,
-        }}
-      >
-        LISEA
-      </div>
-
-      <div
-        style={{
-          fontSize: 18,
-          color: "#999",
-          letterSpacing: 3,
-        }}
-      >
-        Verificando sistema...
-      </div>
-
-      <div
-        style={{
-          color: "#D4AF37",
-          fontSize: 26,
-          letterSpacing: 10,
-        }}
-      >
-        • • •
-      </div>
-    </div>
-  );
-}
 
   return (
 
